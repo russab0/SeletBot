@@ -1,18 +1,26 @@
 import requests
+import telegram
+from telegram import ParseMode
 import telebot
 import re
+
 
 bot = telebot.TeleBot('840709555:AAEm3hTvuc3wwAuXOWuQZj8kqdVtJXoMQwY')
 SITE = 'http://selet.biz'
 
 def get_list_of_applications():
     r = requests.get(SITE)
-    page = r.text
-    proj = re.findall('id="bx_3218110189_\d{5}">.{1,}?<', page)
-    proj = [re.findall('>.+<', p)[0][1:-1] for p in proj]
-    return proj
+    page = r.text 
+    app = re.findall(r'<a href="(/form/\?ID=\d{5})" class="btn" id="bx_3218110189_\d{5}">(.+)</a>', page)
 
-def get_list_of_alans():
+    for i in range(len(app)):
+        pos = app[i][1].find('style')
+        app[i] = list(app[i])
+        if pos >= 0:
+            app[i][1] = app[i][1][:pos-1]
+    return app
+
+def get_list_of_camps():
     r = requests.get(SITE + '/tat/projects/camp/')
     page = r.text
     camps = re.findall('<a href="(/tat/projects/camp/.+/)">(.+)</a>\n', page)[:19]
@@ -21,13 +29,15 @@ def get_list_of_alans():
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
     if message.text == "Заявки":
-        res = "\n".join(get_list_of_applications())
+        res = ""
+        for addr, name in get_list_of_applications():
+            res += '(' + name + ')[' + SITE + addr + '] \n'
     elif message.text == "Лагеря":
-        res = "**" + str(get_list_of_alans()) + "**"        
+        res = ""
+        for addr, name in get_list_of_camps():
+            res += '(' + name + ')[' + SITE + addr + '] \n'
     else:
         res = "__Я тебя не понимаю__"
     bot.send_message(message.from_user.id, res, parse_mode='Markdown')
-
-print(get_list_of_alans())
         
 bot.polling(none_stop=True, interval=0)
