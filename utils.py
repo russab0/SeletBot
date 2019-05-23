@@ -17,5 +17,4 @@ def camp_detail(name):
         if value:
             res += f'*{key}*: {value[0]}\n'
     res += f'[{SITE + link}](Подробнее) '
-    print(res)
     return res

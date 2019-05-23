@@ -12,5 +12,4 @@ class ProjectsView:
             page = r.text
             projects += re.findall(r'<h3 class="news-title"><a href="(.+)">(.+)</a></h3>', page)
             page_num += 1
-        print(projects)
         return projects

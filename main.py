@@ -11,24 +11,32 @@ import constants
 token = open('tgtoken.txt', 'r').readline().strip()
 bot = TeleBot(token)
 
-"""
+
 def init_keyboard():
     camps_button = telegram.KeyboardButton('Лагеря')
     apps_button = telegram.KeyboardButton('Заявки')
-    telegram.ReplyKeyboardMarkup([camps_button, apps_button])
-    #bot.
-"""
+    projects_button = telegram.KeyboardButton('Проекты')
+    telegram.ReplyKeyboardMarkup([camps_button, apps_button, projects_button])
+
 
 class Handler:
+    user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
+    user_markup.row('Лагеря')
+    user_markup.row('Заявки')
+    user_markup.row('Проекты')
+    user_markup.row('🍚', '👍', '❤')
+
     @staticmethod
     @bot.message_handler(commands=['start'])
     def start_message(message):
-        bot.send_message(message.chat.id, constants.START_MESSAGE, parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(message.chat.id, constants.START_MESSAGE, parse_mode=telegram.ParseMode.MARKDOWN,
+                         reply_markup=Handler.user_markup)
 
     @staticmethod
     @bot.message_handler(commands=['help'])
     def help_message(message):
-        bot.send_message(message.chat.id, constants.HELP_MESSAGE, parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(message.chat.id, constants.HELP_MESSAGE, parse_mode=telegram.ParseMode.MARKDOWN,
+                         reply_markup=Handler.user_markup)
 
     @staticmethod
     @bot.message_handler(content_types=['text'])
@@ -58,7 +66,8 @@ class Handler:
             res = '_Я тебя не понимаю_'
 
         bot.send_message(user_id, res, parse_mode=telegram.ParseMode.MARKDOWN,
-                         disable_web_page_preview=disable_web_page_preview)
+                         disable_web_page_preview=disable_web_page_preview,
+                         reply_markup=Handler.user_markup)
 
     @staticmethod
     @bot.message_handler(content_types=['audio', 'video', 'document', 'location', 'contact', 'sticker'])
@@ -67,5 +76,5 @@ class Handler:
         bot.send_message(message.from_user.id, res, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-#init_keyboard()
+init_keyboard()
 bot.polling(none_stop=True, interval=0)
