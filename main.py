@@ -11,13 +11,13 @@ import constants
 token = open('tgtoken.txt', 'r').readline().strip()
 bot = TeleBot(token)
 
-
+"""
 def init_keyboard():
     camps_button = telegram.KeyboardButton('Лагеря')
     apps_button = telegram.KeyboardButton('Заявки')
     telegram.ReplyKeyboardMarkup([camps_button, apps_button])
     #bot.
-
+"""
 
 class Handler:
     @staticmethod
@@ -67,5 +67,5 @@ class Handler:
         bot.send_message(message.from_user.id, res, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-init_keyboard()
+#init_keyboard()
 bot.polling(none_stop=True, interval=0)
