@@ -1,43 +1,71 @@
-import requests
-import telegram
-from telegram import ParseMode
-import telebot
-import re
+from telebot import TeleBot
+import telegram, telebot
+
+from queries.applications import ApplicationsView
+from queries.projects import ProjectsView
+from queries.camps import CampsView
+
+from utils import list_of_links, camp_detail
+import constants
+
+token = open('tgtoken.txt', 'r').readline().strip()
+bot = TeleBot(token)
 
 
-bot = telebot.TeleBot('840709555:AAEm3hTvuc3wwAuXOWuQZj8kqdVtJXoMQwY')
-SITE = 'http://selet.biz'
+def init_keyboard():
+    camps_button = telegram.KeyboardButton('Лагеря')
+    apps_button = telegram.KeyboardButton('Заявки')
+    telegram.ReplyKeyboardMarkup([camps_button, apps_button])
+    #bot.
 
-def get_list_of_applications():
-    r = requests.get(SITE)
-    page = r.text 
-    app = re.findall(r'<a href="(/form/\?ID=\d{5})" class="btn" id="bx_3218110189_\d{5}">(.+)</a>', page)
 
-    for i in range(len(app)):
-        pos = app[i][1].find('style')
-        app[i] = list(app[i])
-        if pos >= 0:
-            app[i][1] = app[i][1][:pos-1]
-    return app
+class Handler:
+    @staticmethod
+    @bot.message_handler(commands=['start'])
+    def start_message(message):
+        bot.send_message(message.chat.id, constants.START_MESSAGE, parse_mode=telegram.ParseMode.MARKDOWN)
 
-def get_list_of_camps():
-    r = requests.get(SITE + '/tat/projects/camp/')
-    page = r.text
-    camps = re.findall('<a href="(/tat/projects/camp/.+/)">(.+)</a>\n', page)[:19]
-    return camps
+    @staticmethod
+    @bot.message_handler(commands=['help'])
+    def help_message(message):
+        bot.send_message(message.chat.id, constants.HELP_MESSAGE, parse_mode=telegram.ParseMode.MARKDOWN)
 
-@bot.message_handler(content_types=['text'])
-def get_text_messages(message):
-    if message.text == "Заявки":
-        res = ""
-        for addr, name in get_list_of_applications():
-            res += '(' + name + ')[' + SITE + addr + '] \n'
-    elif message.text == "Лагеря":
-        res = ""
-        for addr, name in get_list_of_camps():
-            res += '(' + name + ')[' + SITE + addr + '] \n'
-    else:
-        res = "__Я тебя не понимаю__"
-    bot.send_message(message.from_user.id, res, parse_mode='Markdown')
-        
+    @staticmethod
+    @bot.message_handler(content_types=['text'])
+    def text_messages(message):
+        text = message.text.lower()
+        disable_web_page_preview = True
+        user_id = message.chat.id
+
+        if text == 'санак':
+            res = camp_detail('Санак')
+        elif text in constants.BON_APPETITE_KEYWORDS:
+            bot.send_sticker(user_id, 'CAADAgADTAgAAnLvWgUxEsiriE91rAI')
+            return
+        elif text in constants.COOL_KEYWORDS:
+            bot.send_sticker(user_id, 'CAADAgADSggAAnLvWgWPSApReQJ-cQI')
+            return
+        elif text in constants.LOVE_KEYWORDS:
+            bot.send_sticker(user_id, 'CAADAgADSAgAAnLvWgUxx7_RczuKiwI')
+            return
+        elif text in constants.APPLICATIONS_KEYWORDS:
+            res = list_of_links(ApplicationsView.list())
+        elif text in constants.CAMPS_KEYWORDS:
+            res = list_of_links(CampsView.list())
+        elif text in constants.PROJECTS_KEYWORDS:
+            res = list_of_links(ProjectsView.list())
+        else:
+            res = '_Я тебя не понимаю_'
+
+        bot.send_message(user_id, res, parse_mode=telegram.ParseMode.MARKDOWN,
+                         disable_web_page_preview=disable_web_page_preview)
+
+    @staticmethod
+    @bot.message_handler(content_types=['audio', 'video', 'document', 'location', 'contact', 'sticker'])
+    def unsupported_messages(message):
+        res = f'_Я не умею отвечать на сообщения такого типа: {message.content_type}_'
+        bot.send_message(message.from_user.id, res, parse_mode=telegram.ParseMode.MARKDOWN)
+
+
+init_keyboard()
 bot.polling(none_stop=True, interval=0)

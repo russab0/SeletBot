@@ -1,0 +1,8 @@
+# Idea
+.idea/*
+
+# MacOS
+.DS_Store
+
+# Telegram Token
+tgtoken.txt
