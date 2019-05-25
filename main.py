@@ -6,6 +6,7 @@ from queries.projects import ProjectsView
 from queries.camps import CampsView
 
 from utils import list_of_links, camp_detail
+from constants import CAMPS_KEYWORDS_NAMES
 import constants
 
 token = open('tgtoken.txt', 'r').readline().strip()
@@ -45,9 +46,7 @@ class Handler:
         disable_web_page_preview = True
         user_id = message.chat.id
 
-        if text == 'санак':
-            res = camp_detail('Санак')
-        elif text in constants.BON_APPETITE_KEYWORDS:
+        if text in constants.BON_APPETITE_KEYWORDS:
             bot.send_sticker(user_id, 'CAADAgADTAgAAnLvWgUxEsiriE91rAI')
             return
         elif text in constants.COOL_KEYWORDS:
@@ -56,6 +55,8 @@ class Handler:
         elif text in constants.LOVE_KEYWORDS:
             bot.send_sticker(user_id, 'CAADAgADSAgAAnLvWgUxx7_RczuKiwI')
             return
+        elif text in CAMPS_KEYWORDS_NAMES:
+            res = camp_detail(text)
         elif text in constants.APPLICATIONS_KEYWORDS:
             res = list_of_links(ApplicationsView.list())
         elif text in constants.CAMPS_KEYWORDS:
