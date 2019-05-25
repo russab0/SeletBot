@@ -26,7 +26,7 @@ class Handler:
     user_markup.row('Заявки')
     user_markup.row('Проекты')
     user_markup.row('🍚', '👍', '❤')
-
+    
     @staticmethod
     @bot.message_handler(commands=['start'])
     def start_message(message):
@@ -56,7 +56,7 @@ class Handler:
             bot.send_sticker(user_id, 'CAADAgADSAgAAnLvWgUxx7_RczuKiwI')
             return
         elif text in CAMPS_KEYWORDS_NAMES:
-            res = camp_detail(text)
+            res = camp_detail(CAMPS_KEYWORDS_NAMES[text])
         elif text in constants.APPLICATIONS_KEYWORDS:
             res = list_of_links(ApplicationsView.list())
         elif text in constants.CAMPS_KEYWORDS:
