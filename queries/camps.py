@@ -1,9 +1,11 @@
 import requests
 import re
-from constants import SITE
+from constants import SITE, CAMPS_NAMES_KEYWORDS
 
 
 class CampsView:
+    cur = None
+
     @staticmethod
     def list():
         r = requests.get(SITE + '/projects/camp/')
@@ -33,8 +35,35 @@ class CampsView:
                   'Участники': part}
         return fields
 
+    def camp_detail(name):
+        fields = CampsView.retrieve(name)
+        name = fields.pop('name')
+        link = fields.pop('link')
+        res = f'*{name}*\n'
+        for key, value in fields.items():
+            if value:
+                res += f'*{key}*: {value[0]}\n'
+        res += f'[{SITE + link}](Подробнее) '
+        return res
 
-#for camp in CampsView().list():
-#    print('===========' + camp[1] + '==========')
-#    CampsView().retrieve(camp[1])
-CampsView().retrieve('Санак')
+    @staticmethod
+    def next():
+        if CampsView.cur is None:
+            CampsView.cur = 0
+        else:
+            CampsView.cur += 1
+        if CampsView.cur >= len(CAMPS_NAMES_KEYWORDS):
+            CampsView.cur = 0
+        name = list(CAMPS_NAMES_KEYWORDS.keys())[CampsView.cur]
+        return CampsView.camp_detail(name)
+
+    @staticmethod
+    def prev():
+        if CampsView.cur is None:
+            CampsView.cur = 0
+        else:
+            CampsView.cur -= 1
+        if CampsView.cur < 0:
+            CampsView.cur = len(CAMPS_NAMES_KEYWORDS) - 1
+        name = list(CAMPS_NAMES_KEYWORDS.keys())[CampsView.cur]
+        return CampsView.camp_detail(name)
